@@ -1,45 +1,40 @@
-import React, { useEffect, useState } from 'react'
-import { supabase } from './supabaseClient'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import supabase from "./supabaseClient";
 
 function App() {
-  const [jobs, setJobs] = useState([])
+  const [jobs, setJobs] = useState([]);
 
   useEffect(() => {
-    fetchJobs()
-  }, [])
-
-  const fetchJobs = async () => {
-    const { data, error } = await supabase.from('jobs').select('*')
-    if (error) {
-      console.error('Error fetching jobs:', error)
-    } else {
-      setJobs(data)
+    async function fetchJobs() {
+      const { data, error } = await supabase.from("jobmatch").select("*");
+      if (error) {
+        console.error("Error fetching jobs:", error.message);
+      } else {
+        setJobs(data);
+      }
     }
-  }
+    fetchJobs();
+  }, []);
 
   return (
-    <div className="App" style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>🎯 Job Matches Just for You</h1>
-      <p>Let’s get you into your next opportunity 🚀</p>
-      <div style={{ marginTop: '2rem' }}>
-        {jobs.length > 0 ? (
-          jobs.map((job) => (
-            <div key={job.id} style={{ border: '1px solid #ccc', borderRadius: '10px', padding: '1rem', marginBottom: '1rem' }}>
-              <h2>{job.title}</h2>
-              <h4>{job.company}</h4>
+    <div style={{ padding: "2rem" }}>
+      <h1>JobMatch</h1>
+      {jobs.length === 0 ? (
+        <p>No jobs found.</p>
+      ) : (
+        <ul>
+          {jobs.map((job) => (
+            <li key={job.id}>
+              <strong>{job.title}</strong> at {job.company} — {job.location}
+              <br />
+              <small>{job.degree_requirements} | {job.experience}</small>
               <p>{job.description}</p>
-              <p><strong>Location:</strong> {job.location}</p>
-              <p><strong>Degree Required:</strong> {job.degree_required || 'None'}</p>
-              <p><strong>Experience:</strong> {job.experience || 'No experience required'}</p>
-            </div>
-          ))
-        ) : (
-          <p>No jobs yet... hang tight!</p>
-        )}
-      </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
