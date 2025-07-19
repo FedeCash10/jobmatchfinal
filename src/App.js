@@ -1,39 +1,45 @@
-import React, { useState } from 'react';
-import './index.css';
+import React, { useEffect, useState } from 'react'
+import { supabase } from './supabaseClient'
+import './App.css'
 
 function App() {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [jobs, setJobs] = useState([])
 
-  const handleSearch = () => {
-    if (!query) return;
-    setResults([
-      { title: 'Security Analyst', company: 'CyberCorp', location: 'Remote' },
-      { title: 'IT Compliance Associate', company: 'TrustStack', location: 'New York, NY' },
-      { title: 'Jr. Cybersecurity Engineer', company: 'NetDefense', location: 'Austin, TX' }
-    ]);
-  };
+  useEffect(() => {
+    fetchJobs()
+  }, [])
+
+  const fetchJobs = async () => {
+    const { data, error } = await supabase.from('jobs').select('*')
+    if (error) {
+      console.error('Error fetching jobs:', error)
+    } else {
+      setJobs(data)
+    }
+  }
 
   return (
-    <div className="container">
-      <h1>Job Matcher</h1>
-      <input
-        type="text"
-        placeholder="Enter job or skills..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      <button onClick={handleSearch}>Find Jobs</button>
-      <ul>
-        {results.map((job, i) => (
-          <li key={i}>
-            <strong>{job.title}</strong><br />
-            {job.company} – {job.location}
-          </li>
-        ))}
-      </ul>
+    <div className="App" style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h1>🎯 Job Matches Just for You</h1>
+      <p>Let’s get you into your next opportunity 🚀</p>
+      <div style={{ marginTop: '2rem' }}>
+        {jobs.length > 0 ? (
+          jobs.map((job) => (
+            <div key={job.id} style={{ border: '1px solid #ccc', borderRadius: '10px', padding: '1rem', marginBottom: '1rem' }}>
+              <h2>{job.title}</h2>
+              <h4>{job.company}</h4>
+              <p>{job.description}</p>
+              <p><strong>Location:</strong> {job.location}</p>
+              <p><strong>Degree Required:</strong> {job.degree_required || 'None'}</p>
+              <p><strong>Experience:</strong> {job.experience || 'No experience required'}</p>
+            </div>
+          ))
+        ) : (
+          <p>No jobs yet... hang tight!</p>
+        )}
+      </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
